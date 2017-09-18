@@ -3,7 +3,7 @@ from maze import Maze
 import random
 import turtle
 import sys
-import floodfill 
+from floodfill import floodFill
 import djkistra
 
 class AlgoPackage(object):
@@ -23,7 +23,7 @@ class AlgoPackage(object):
 		if self.algoType == "Djskitra":
 			self.algoObj = Djkistra(location, heading, goal_bounds, self.mazeDim  )
 		elif self.algoType == "floodfill":
-			self.algoObj = floodFill(location, heading, goal_bounds, self.mazeDim)	
+			self.algoObj =  floodFill(location, heading, goal_bounds, self.mazeDim)	
 		elif self.algoType == "random":
 			self.algoObj= None
 		else:

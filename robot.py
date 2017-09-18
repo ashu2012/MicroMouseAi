@@ -17,7 +17,8 @@ class Robot(object):
 
             # check for goal entered
         self.goal_bounds = [maze_dim/2 - 1, maze_dim/2]
-        self.algoObj=  AlgoPackage('random' ,self.location, self.heading,self.goal_bounds, self.maze_dim )
+        #self.algoObj=  AlgoPackage('random' ,self.location, self.heading,self.goal_bounds, self.maze_dim )
+        self.algoObj=  AlgoPackage('floodfill' ,self.location, self.heading,self.goal_bounds, self.maze_dim )
 
 
     def next_move(self, sensors):
