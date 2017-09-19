@@ -43,15 +43,74 @@ class floodFill(object):
 		for i, item in enumerate(mazeDepth): 
 			mazeDepth[i] = [0]*mazeDim
 			 
-		 
-	 
+	def headingToDirection(self,heading):
+		dir_heading = {'u': 'N', 'up': 'N','r': 'E','right': 'E', 'd': 'S','down': 'S' , 'l': 'W' , 'left':'W' } 
+		return dir_heading[heading]
+	
+
+	def updateWalls(self ,sensing,oldLocation , oldHeading ):
+
+		# global dictionaries for robot movement and sensing
+		dir_sensors = {'u': ['l', 'u', 'r'], 'r': ['u', 'r', 'd'],
+					   'd': ['r', 'd', 'l'], 'l': ['d', 'l', 'u'],
+					   'up': ['l', 'u', 'r'], 'right': ['u', 'r', 'd'],
+					   'down': ['r', 'd', 'l'], 'left': ['d', 'l', 'u']}
+		dir_move = {'u': [0, 1], 'r': [1, 0], 'd': [0, -1], 'l': [-1, 0],
+					'up': [0, 1], 'right': [1, 0], 'down': [0, -1], 'left': [-1, 0]}
+		dir_reverse = {'u': 'd', 'r': 'l', 'd': 'u', 'l': 'r',
+					   'up': 'd', 'right': 'l', 'down': 'u', 'left': 'r'}
+		
+		print(sensing,oldLocation , oldHeading )
+		curr_cell=[None, None]	   
+		leftsensing=sensing[0]
+		curr_cell[0]=oldLocation[0]
+		curr_cell[1]=oldLocation[1]
+		curr_left_direction=dir_sensors[oldHeading][0]
+		curr_opp_left_direction=self.headingToDirection(dir_reverse[curr_left_direction])
+		while leftsensing>-1:
+			leftsensing =leftsensing- 1
+			self.cellSetWall(curr_cell[0],curr_cell[1],curr_opp_left_direction)
+			curr_cell[0] += dir_move[curr_left_direction][0]
+			curr_cell[1] += dir_move[curr_left_direction][1]
+			
+
+
+		straightsensing=sensing[1]
+		curr_cell[0]=oldLocation[0]
+		curr_cell[1]=oldLocation[1]
+		curr_straight_direction=dir_sensors[oldHeading][1]
+		curr_opp_straight_direction=self.headingToDirection(dir_reverse[curr_straight_direction])
+		while straightsensing>-1:
+			straightsensing =straightsensing- 1
+			self.cellSetWall(curr_cell[0],curr_cell[1],curr_opp_straight_direction)
+			curr_cell[0] += dir_move[curr_straight_direction][0]
+			curr_cell[1] += dir_move[curr_straight_direction][1]
+			
+
+
+		rightsensing=sensing[2]
+		curr_cell[0]=oldLocation[0]
+		curr_cell[1]=oldLocation[1]
+		curr_right_direction=dir_sensors[oldHeading][2]
+		curr_opp_right_direction=self.headingToDirection(dir_reverse[curr_right_direction])
+		while rightsensing>-1:
+			self.cellSetWall(curr_cell[0],curr_cell[1],curr_opp_right_direction)
+			rightsensing =rightsensing- 1
+			curr_cell[0] += dir_move[curr_right_direction][0]
+			curr_cell[1] += dir_move[curr_right_direction][1]
+			
+		
 	# This function is called by the simulator to get the
 	# next step the mouse should take.
-	def nextStep(self ,sensing ,direction,  ):
+	def nextStep(self ,sensing ,location,heading, oldLocation , oldHeading ):
 		print(sensing)
 		
 		print "#####NEXT STEP"
-		 
+		PosR = location[0] #Row position
+		PosC = location[1] #Column position
+		
+		self.updateWalls(sensing,oldLocation , oldHeading)
+		direction = self.headingToDirection(heading) #robots  (heading) to N, E, S, W
 		self.recordWalls()
 		self.doFlood()
 		nextCell = self.findPath()
@@ -64,65 +123,65 @@ class floodFill(object):
 		 
 		if(nextCell == [-1,-1]):
 			print "Cannot find path"
-			return Left
+			return "Left"
 		elif nextCell[0] < PosR: #if next cell is north of robot. 
 			#based on the direction of the robot we need to move forward or turn.
 			if(direction == "N"): 
 				PosR = nextCell[0]
-				return Forward
+				return "up"
 			if(direction == "E"): 
 				direction = "N"
-				return Left
+				return "left"
 			if(direction == "S"): 
 				direction = "E"
-				return Left
+				return "left"
 			if(direction == "W"):
 				direction = "N"
-				return Right
+				return "right"
 		elif nextCell[1] > PosC: #if next cell is east of robot. 
 			#based on the direction of the robot we need to move forward or turn.
 			if(direction == "N"):
 				direction = "E"
-				return Right
+				return "right"
 			if(direction == "E"): 
 				PosC = nextCell[1]
-				return Forward
+				return "up"
 			if(direction == "S"): 
 				direction = "E"
-				return Left
+				return "left"
 			if(direction == "W"):
 				direction = "N"
-				return Right
+				return "right"
 		elif nextCell[0] > PosR: #if next cell is south of robot. 
 			#based on the direction of the robot we need to move forward or turn.
 			if(direction == "N"): 
 				direction = "W"
-				return Left
+				return "left"
 			if(direction == "E"): 
 				direction = "S"
-				return Right
+				return "right"
 			if(direction == "S"): 
 				PosR = nextCell[0]
-				return Forward
+				return "up"
 			if(direction == "W"):
 				direction = "S"
-				return Left
+				return "left"
 		elif nextCell[1] < PosC: #if next cell is west of robot. 
 			#based on the direction of the robot we need to move forward or turn.
 			if(direction == "N"):
 				direction = "W"
-				return Left
+				return "left"
 			if(direction == "E"): 
 				direction = "N"
-				return Left
+				return "left"
 			if(direction == "S"): 
 				direction = "W"
-				return Right
+				return "right"
 			if(direction == "W"):
 				PosC = nextCell[1]
-				return Forward
+				return "up"
 		print "Fail."
-		return Right
+		return "right"
 	 
 		 
 		 
@@ -223,7 +282,18 @@ class floodFill(object):
 			if maze.isWallLeft():
 				wallSetS(PosR,PosC)     
 	 
-	 
+	#set wall at given direction in a cell
+	def cellSetWall(self, row, col, heading):
+		print(row, col, heading)
+		if(heading == "N"):
+			self.wallSetN(row,col)
+		elif(heading == "E"):
+			self.wallSetE(row,col)
+		elif(heading == "S"):
+			self.wallSetS(row,col)
+		elif(heading == "W"):
+			 self.wallSetW(row,col)    
+
 	def wallSetN(self,Row,Col):
 		global mazeWalls
 		mazeWalls[Row][Col][0] = 1

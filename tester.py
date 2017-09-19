@@ -130,6 +130,7 @@ if __name__ == '__main__':
                         movement = 0
 
             
+            testrobot.update_move(robot_pos['location'],robot_pos['heading'])
 
             # check for goal entered
             goal_bounds = [testmaze.dim/2 - 1, testmaze.dim/2]

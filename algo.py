@@ -40,9 +40,9 @@ class AlgoPackage(object):
 
 
 
-	def callFloodfill(self , sensing):
+	def callFloodfill(self , sensing ,location,direction ,oldLocation ,oldHeading):
 		print "calling floodfill algo"
-		(rotation,movement)=self.algoObj.nextStep(sensing)
+		(rotation,movement)=self.algoObj.nextStep(sensing ,location,direction ,oldLocation ,oldHeading)
 
 		return (rotation,movement)
 
@@ -53,7 +53,7 @@ class AlgoPackage(object):
 		pass
 
 
-	def nextMove(self , sensing ):
+	def nextMove(self , sensing ,location,direction ,oldLocation ,oldHeading):
 		print(sensing)
 		if self.algoType == "djskitra":
 			return self.callDjkistra(sensing)
@@ -62,7 +62,7 @@ class AlgoPackage(object):
 			return self.callRandom(sensing)
 
 		elif self.algoType == "floodfill":
-			return self.callFloodfill(sensing)
+			return self.callFloodfill(sensing ,location,direction ,oldLocation ,oldHeading)
 		else:
 			print("No specific  algorithm  mentioned")
 

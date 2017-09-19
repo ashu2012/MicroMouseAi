@@ -14,7 +14,8 @@ class Robot(object):
         self.location = [0, 0]
         self.heading = 'up'
         self.maze_dim = maze_dim
-
+        self.oldLocation=[0, 0]
+        self.oldheading='up'
             # check for goal entered
         self.goal_bounds = [maze_dim/2 - 1, maze_dim/2]
         #self.algoObj=  AlgoPackage('random' ,self.location, self.heading,self.goal_bounds, self.maze_dim )
@@ -42,7 +43,7 @@ class Robot(object):
         the maze) then returing the tuple ('Reset', 'Reset') will indicate to
         the tester to end the run and return the robot to the start.
         '''
-        (rotation,movement) = self.algoObj.nextMove(sensors)
+        (rotation,movement) = self.algoObj.nextMove(sensors ,self.location,self.heading ,self.oldLocation,self.oldheading )
         print("robot rotation=" ,rotation)
         print("robot movement=" ,movement)
 
@@ -50,3 +51,10 @@ class Robot(object):
         #movement = 0
 
         return rotation, movement
+
+
+    def update_move(self, location , direction):
+        self.oldLocation=self.location
+        self.oldheading=self.heading
+        self.location = location
+        self.heading = direction
