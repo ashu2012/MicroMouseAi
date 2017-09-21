@@ -44,7 +44,7 @@ class Robot(object):
         the tester to end the run and return the robot to the start.
         '''
         (rotation,movement) = self.algoObj.nextMove(sensors ,self.location,self.heading ,self.oldLocation,self.oldheading )
-        print("robot rotation=" ,rotation)
+        print("robot rotation =" ,rotation)
         print("robot movement=" ,movement)
 
         #rotation = 0

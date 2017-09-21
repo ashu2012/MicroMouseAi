@@ -12,8 +12,8 @@ class floodFill(object):
 	def __init__(self, location, heading, goal_bounds, mazeDim):
 		print "############################BEGIN FLood fill #############################"
 
-		global mazeWalls, PosR, PosC, direction #This is needed to change the value of these variables
-		global GoalR , GoalC ,mazeDepth ,mazeDimension 
+		global mazeWalls, PosR, PosC, direction  #This is needed to change the value of these variables
+		global GoalR , GoalC ,mazeDepth ,mazeDimension ,scanDepth 
 		#Assuming maze is 16x16... Robot starts in south west corner.
 		#Cell 0,0 (Rows, Columns) is in the Northwest corner.
 		 
@@ -42,11 +42,28 @@ class floodFill(object):
 		mazeDepth = [0]*mazeDim #another way of creating nested list (more efficient)
 		for i, item in enumerate(mazeDepth): 
 			mazeDepth[i] = [0]*mazeDim
+
+		global mazeDepth
+		 
+		#"zero" out depth (Negative one is an unscanned cell)
+		for i, index in enumerate(mazeDepth):
+			for j, item in enumerate(mazeDepth[i]):
+				mazeDepth[i][j] = -1
+	 
+		  
+		mazeDepth[PosR][PosC] = scanDepth = 0 #initialize scan depth and set robot position cell to zero.
+		#Iterate (scan) through maze once for each depth to flood. (Robot is at depth 0)
+
+
 			 
 	def headingToDirection(self,heading):
-		dir_heading = {'u': 'N', 'up': 'N','r': 'E','right': 'E', 'd': 'S','down': 'S' , 'l': 'W' , 'left':'W' } 
+		dir_heading = {'u': 'S', 'up': 'S','r': 'E','right': 'E', 'd': 'N','down': 'N' , 'l': 'W' , 'left':'W' } 
 		return dir_heading[heading]
 	
+
+	def headingToRotation(self,direction):
+		dir_heading = {'f': 0, 'forward': 0,'r': -90,'right': -90,'l': 90 , 'left':90 } 
+		return dir_heading[direction]
 
 	def updateWalls(self ,sensing,oldLocation , oldHeading ):
 
@@ -111,13 +128,16 @@ class floodFill(object):
 		
 		self.updateWalls(sensing,oldLocation , oldHeading)
 		direction = self.headingToDirection(heading) #robots  (heading) to N, E, S, W
-		self.recordWalls()
-		self.doFlood()
-		nextCell = self.findPath()
+		#self.recordWalls()
+		
+		
+		nextCell = self.doFlood()
+		# once exploreation  done find path
+		#nextCell = self.findPath()
 	 
 		#Debug prints
 		print "nextCell: "+str(nextCell)
-		print "Direction: "+str(direction)
+		print " Current Direction: "+str(direction)
 		print "mazeWalls[PosR][PosC]: "+str(mazeWalls[PosR][PosC])
 	 
 		 
@@ -128,91 +148,88 @@ class floodFill(object):
 			#based on the direction of the robot we need to move forward or turn.
 			if(direction == "N"): 
 				PosR = nextCell[0]
-				return "up"
+				return (self.headingToRotation("forward") ,1)
 			if(direction == "E"): 
 				direction = "N"
-				return "left"
+				return (self.headingToRotation("left") ,0)
 			if(direction == "S"): 
 				direction = "E"
-				return "left"
+				return (self.headingToRotation("left") ,0)
 			if(direction == "W"):
 				direction = "N"
-				return "right"
+				return (self.headingToRotation("right") ,0)
 		elif nextCell[1] > PosC: #if next cell is east of robot. 
 			#based on the direction of the robot we need to move forward or turn.
 			if(direction == "N"):
 				direction = "E"
-				return "right"
+				return (self.headingToRotation("right") ,0)
 			if(direction == "E"): 
 				PosC = nextCell[1]
-				return "up"
+				return (self.headingToRotation("forward") ,1)
 			if(direction == "S"): 
 				direction = "E"
-				return "left"
+				return (self.headingToRotation("left") ,0)
 			if(direction == "W"):
 				direction = "N"
-				return "right"
+				return (self.headingToRotation("right") ,0)
 		elif nextCell[0] > PosR: #if next cell is south of robot. 
 			#based on the direction of the robot we need to move forward or turn.
 			if(direction == "N"): 
 				direction = "W"
-				return "left"
+				return (self.headingToRotation("left") ,0)
 			if(direction == "E"): 
 				direction = "S"
-				return "right"
+				return (self.headingToRotation("right") ,0)
 			if(direction == "S"): 
 				PosR = nextCell[0]
-				return "up"
+				return (self.headingToRotation("forward") ,1)
 			if(direction == "W"):
 				direction = "S"
-				return "left"
+				return (self.headingToRotation("left") ,0)
 		elif nextCell[1] < PosC: #if next cell is west of robot. 
 			#based on the direction of the robot we need to move forward or turn.
 			if(direction == "N"):
 				direction = "W"
-				return "left"
+				return (self.headingToRotation("left") ,0)
 			if(direction == "E"): 
 				direction = "N"
-				return "left"
+				return (self.headingToRotation("left") ,0)
 			if(direction == "S"): 
 				direction = "W"
-				return "right"
+				return (self.headingToRotation("right") ,0)
 			if(direction == "W"):
 				PosC = nextCell[1]
-				return "up"
-		print "Fail."
-		return "right"
+				return (self.headingToRotation("forward") ,1)
+		else:
+			print "Fail."
+			return (self.headingToRotation("right") ,0)
 	 
 		 
 		 
 	def doFlood(self): #SCAN AND LABEL mazeDepth with distance (depth) values
-		global mazeDepth
-		 
-		#"zero" out depth (Negative one is an unscanned cell)
-		for i, index in enumerate(mazeDepth):
-			for j, item in enumerate(mazeDepth[i]):
-				mazeDepth[i][j] = -1
-	 
-		  
-		mazeDepth[PosR][PosC] = scanDepth = 0 #initialize scan depth and set robot position cell to zero.
-		#Iterate (scan) through maze once for each depth to flood. (Robot is at depth 0)
+		global scanDepth
+		nextCell=[]
 		while(scanDepth < mazeDimension * mazeDimension -1): #(255 is the overflow)
 			scanDepth += 1
-			for r in range(0,mazeDimension):
-				for c in range(0,mazeDimension):
+			for r in range(PosR,mazeDimension):
+				for c in range(PosC,mazeDimension):
 					if mazeDepth[r][c] == -1: #if cell hasn't been labeled (-1)
 						if ((r != 0 and mazeWalls[r][c][0] == 0 and mazeDepth[r-1][c] != -1 and mazeDepth[r-1][c] != scanDepth) #Monster IF looks at adjacent cells to the one being scanned
 						or (r != mazeDimension-1 and mazeWalls[r][c][2] == 0 and mazeDepth[r+1][c] != -1 and mazeDepth[r+1][c] != scanDepth)#If an adjactent cell isn't separated by a wall and has been 
 						or (c != 0 and mazeWalls[r][c][3] == 0 and mazeDepth[r][c-1] != -1 and mazeDepth[r][c-1] != scanDepth) # given a depth then the currently scanned cell is given
 						or (c != mazeDimension-1 and mazeWalls[r][c][1] == 0 and mazeDepth[r][c+1] != -1 and mazeDepth[r][c+1] != scanDepth)): # the current depth
 							mazeDepth[r][c] = scanDepth
+						nextCell=[r,c]
+						break
 			if mazeDepth[GoalR][GoalC] != -1: #if you have flooded enough to reach the goal position. STOP FLOODING!
-				break  
+				nextCell=[GoalR,GoalC]
+				break
+			break  
 		#PRINT THE MAZE AFTER FLOOD                 
 		for i, index in enumerate(mazeDepth):
 			print mazeDepth[i]
 	 
-		 
+		return nextCell
 	 
 	def findPath(self ): 
 		#Starting at the goal, find the shortest path back to the robot.
@@ -285,7 +302,7 @@ class floodFill(object):
 	#set wall at given direction in a cell
 	def cellSetWall(self, row, col, heading):
 		print(row, col, heading)
-		if(heading == "N"):
+		if(heading == "S"):
 			self.wallSetN(row,col)
 		elif(heading == "E"):
 			self.wallSetE(row,col)

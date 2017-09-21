@@ -44,6 +44,7 @@ class AlgoPackage(object):
 		print "calling floodfill algo"
 		(rotation,movement)=self.algoObj.nextStep(sensing ,location,direction ,oldLocation ,oldHeading)
 
+		print((rotation,movement))
 		return (rotation,movement)
 
 
