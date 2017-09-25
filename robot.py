@@ -53,8 +53,8 @@ class Robot(object):
         return rotation, movement
 
 
-    def update_move(self, location , direction):
+    def update_move(self, currlocation , currdirection):
         self.oldLocation=self.location
         self.oldheading=self.heading
-        self.location = location
-        self.heading = direction
+        self.location = currlocation
+        self.heading = currdirection

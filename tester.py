@@ -94,7 +94,7 @@ if __name__ == '__main__':
                 print "Movement limited to three squares in a turn."
             movement = max(min(int(movement), 3), -3) # fix to range [-3, 3]
 
-            print("current robot  action =" ,robot_pos)
+            print("current robot location , action =" ,robot_pos , movement)
 
             while movement:
 
