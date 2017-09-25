@@ -17,7 +17,7 @@ class Robot(object):
         self.oldLocation=[0, 0]
         self.oldheading='up'
             # check for goal entered
-        self.goal_bounds = [maze_dim/2 - 1, maze_dim/2]
+        self.goal_bounds = [int(maze_dim/2) - 1, int(maze_dim/2)]
         #self.algoObj=  AlgoPackage('random' ,self.location, self.heading,self.goal_bounds, self.maze_dim )
         self.algoObj=  AlgoPackage('floodfill' ,self.location, self.heading,self.goal_bounds, self.maze_dim )
 
@@ -44,8 +44,8 @@ class Robot(object):
         the tester to end the run and return the robot to the start.
         '''
         (rotation,movement) = self.algoObj.nextMove(sensors ,self.location,self.heading ,self.oldLocation,self.oldheading )
-        print("robot rotation =" ,rotation)
-        print("robot movement=" ,movement)
+        print(("robot rotation =" ,rotation))
+        print(("robot movement=" ,movement))
 
         #rotation = 0
         #movement = 0

@@ -38,7 +38,7 @@ if __name__ == '__main__':
     runtimes = []
     total_time = 0
     for run in range(2):
-        print "Starting run {}.".format(run)
+        print("Starting run {}.".format(run))
 
         # Set the robot in the start position. Note that robot position
         # parameters are independent of the robot itself.
@@ -51,7 +51,7 @@ if __name__ == '__main__':
             total_time += 1
             if total_time > max_time:
                 run_active = False
-                print "Allotted time exceeded."
+                print("Allotted time exceeded.")
                 break
 
             # provide robot with sensor information, get actions
@@ -68,13 +68,13 @@ if __name__ == '__main__':
                 if run == 0 and hit_goal:
                     run_active = False
                     runtimes.append(total_time)
-                    print "Ending first run. Starting next run."
+                    print("Ending first run. Starting next run.")
                     break
                 elif run == 0 and not hit_goal:
-                    print "Cannot reset - robot has not hit goal yet."
+                    print("Cannot reset - robot has not hit goal yet.")
                     continue
                 else:
-                    print "Cannot reset on runs after the first."
+                    print("Cannot reset on runs after the first.")
                     continue
 
             # perform rotation
@@ -85,16 +85,16 @@ if __name__ == '__main__':
             elif rotation == 0:
                 pass
             else:
-                print "Invalid rotation value, no rotation performed."
+                print("Invalid rotation value, no rotation performed.")
 
             
             dir_changed= False
             # perform movement
             if abs(movement) > 3:
-                print "Movement limited to three squares in a turn."
+                print("Movement limited to three squares in a turn.")
             movement = max(min(int(movement), 3), -3) # fix to range [-3, 3]
 
-            print("current robot location , action =" ,robot_pos , movement)
+            print(("current robot location , action =" ,robot_pos , movement))
 
             while movement:
 
@@ -113,7 +113,7 @@ if __name__ == '__main__':
                         
 
                     else:
-                        print "Movement stopped by wall."
+                        print("Movement stopped by wall.")
                         movement = 0
                 else:
                     rev_heading = dir_reverse[robot_pos['heading']]
@@ -126,7 +126,7 @@ if __name__ == '__main__':
                         mazeObj.drawSearchPath(robot_pos['location'][0],robot_pos['location'][1] ,'b')
                         movement += 1
                     else:
-                        print "Movement stopped by wall."
+                        print("Movement stopped by wall.")
                         movement = 0
 
             
@@ -139,11 +139,11 @@ if __name__ == '__main__':
                 if run != 0:
                     runtimes.append(total_time - sum(runtimes))
                     run_active = False
-                    print "Goal found; run {} completed!".format(run)
+                    print("Goal found; run {} completed!".format(run))
 
     # Report score if robot is successful.
     if len(runtimes) == 2:
-        print "Task complete! Score: {:4.3f}".format(runtimes[1] + train_score_mult*runtimes[0])
+        print("Task complete! Score: {:4.3f}".format(runtimes[1] + train_score_mult*runtimes[0]))
 
 while(True):
         continue

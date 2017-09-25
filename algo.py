@@ -12,7 +12,7 @@ class AlgoPackage(object):
 		"""
 		taking type of algo
 		"""
-		print(typeOfAlgo , location, heading,goal_bounds, mazeDim)
+		print((typeOfAlgo , location, heading,goal_bounds, mazeDim))
 		self.algoType = typeOfAlgo
 		self.mazeDim = mazeDim
 		self.algoObj = None
@@ -33,7 +33,7 @@ class AlgoPackage(object):
 
 
 	def callRandom(self ,sensing):
-		print "calling random algo"
+		print("calling random algo")
 		possible_movement = [-3, -2, -1, 0, 1 , 2,3]
 		possible_rotation=[-90 ,0 ,90]
 		return (random.choice(possible_rotation) ,random.choice(possible_movement))
@@ -41,7 +41,7 @@ class AlgoPackage(object):
 
 
 	def callFloodfill(self , sensing ,location,direction ,oldLocation ,oldHeading):
-		print "calling floodfill algo"
+		print("calling floodfill algo")
 		(rotation,movement)=self.algoObj.nextStep(sensing ,location,direction ,oldLocation ,oldHeading)
 
 		print((rotation,movement))

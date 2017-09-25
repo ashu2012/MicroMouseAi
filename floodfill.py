@@ -7,7 +7,10 @@ import turtle
 import sys
 import pdb
 import numpy as np
+import queue
 
+
+	
 class Stack:
 	def __init__(self):
 		self.items = []
@@ -28,20 +31,23 @@ class Stack:
 		return len(self.items)
 
 	def printst(self):
-		print(self.items)
+		print((self.items))
 
 
 class floodFill(object):
 	def __init__(self, location, heading, goal_bounds, mazeDim):
-		print "############################BEGIN FLood fill #############################"
+		print("############################BEGIN FLood fill #############################")
 
 		global stackNext 
 		stackNext = Stack()
-		global mazeWalls, PosR, PosC, direction  #This is needed to change the value of these variables
+		global mazeWalls 
+		global PosR 
+		global PosC, direction  #This is needed to change the value of these variables
 		global GoalR , GoalC ,mazeDepth ,mazeDimension ,scanDepth 
 		#Assuming maze is 16x16... Robot starts in south west corner.
 		#Cell 0,0 (Rows, Columns) is in the Northwest corner.
-		 
+		#global oldLocation 
+		self.oldLocation =[0,0]
 		# 0...15
 		# :
 		# 15
@@ -79,6 +85,13 @@ class floodFill(object):
 		mazeDepth[PosR][PosC] = scanDepth = 0 #initialize scan depth and set robot position cell to zero.
 		#Iterate (scan) through maze once for each depth to flood. (Robot is at depth 0)
 
+		global q
+		q = queue.LifoQueue()
+
+		
+		q.put([0,0,1])
+
+		
 
 			 
 	def headingToDirection(self,heading):
@@ -102,7 +115,7 @@ class floodFill(object):
 		dir_reverse = {'u': 'd', 'r': 'l', 'd': 'u', 'l': 'r',
 					   'up': 'd', 'right': 'l', 'down': 'u', 'left': 'r'}
 		
-		print(sensing,oldLocation , oldHeading )
+		print((sensing,oldLocation , oldHeading ))
 		curr_cell=[None, None]	   
 		leftsensing=sensing[0]
 		curr_cell[0]=oldLocation[0]
@@ -112,7 +125,7 @@ class floodFill(object):
 		while leftsensing>0:
 			leftsensing =leftsensing- 1
 			self.cellSetWall(curr_cell[0],curr_cell[1],curr_opp_left_direction)
-			print "mazeWalls["+str(curr_cell[0])+"]["+str(curr_cell[1])+"]: "+str(mazeWalls[curr_cell[0]][curr_cell[1]])
+			#print("mazeWalls["+str(curr_cell[0])+"]["+str(curr_cell[1])+"]: "+str(mazeWalls[curr_cell[0]][curr_cell[1]]))
 			curr_cell[0] += dir_move[curr_left_direction][0]
 			curr_cell[1] += dir_move[curr_left_direction][1]
 			
@@ -126,7 +139,7 @@ class floodFill(object):
 		while straightsensing>0:
 			straightsensing =straightsensing- 1
 			self.cellSetWall(curr_cell[0],curr_cell[1],curr_opp_straight_direction)
-			print "mazeWalls["+str(curr_cell[0])+"]["+str(curr_cell[1])+"]: "+str(mazeWalls[curr_cell[0]][curr_cell[1]])
+			#print("mazeWalls["+str(curr_cell[0])+"]["+str(curr_cell[1])+"]: "+str(mazeWalls[curr_cell[0]][curr_cell[1]]))
 			curr_cell[0] += dir_move[curr_straight_direction][0]
 			curr_cell[1] += dir_move[curr_straight_direction][1]
 			
@@ -138,24 +151,29 @@ class floodFill(object):
 		curr_opp_right_direction=self.headingToDirection(curr_right_direction)
 		while rightsensing>0:
 			self.cellSetWall(curr_cell[0],curr_cell[1],curr_opp_right_direction)
-			print "mazeWalls["+str(curr_cell[0])+"]["+str(curr_cell[1])+"]: "+str(mazeWalls[curr_cell[0]][curr_cell[1]])
+			#print("mazeWalls["+str(curr_cell[0])+"]["+str(curr_cell[1])+"]: "+str(mazeWalls[curr_cell[0]][curr_cell[1]]))
 			rightsensing =rightsensing- 1
 			curr_cell[0] += dir_move[curr_right_direction][0]
 			curr_cell[1] += dir_move[curr_right_direction][1]
 		
 	def printMaze(self):
 		#PRINT THE MAZE AFTER FLOOD 
-		pdb.set_trace()                
+		#pdb.set_trace()                
 		for j in range(len(mazeDepth)-1, -1,-1):
 			for i in range(0,len(mazeDepth), 1):
-				print mazeDepth[i][j] ,
-			print
+				if mazeDepth[i][j] >-1 and  mazeDepth[i][j] <10:
+					print(" "+str(mazeDepth[i][j]), end='  ')
+				else:
+					print(str(mazeDepth[i][j]), end='  ')
+			print()
 	# This function is called by the simulator to get the
 	# next step the mouse should take.
 	def nextStep(self ,sensing ,location,heading, oldLocation , oldHeading ):
 		print(sensing)
 		
-		print "#####NEXT STEP"
+		print("#############################NEXT STEP##################################")
+		print("previous location:" ,self.oldLocation)
+		print("currentCell: "+str(location))
 		PosR = location[1] #Row position
 		PosC = location[0] #Column position
 		
@@ -163,22 +181,32 @@ class floodFill(object):
 		direction = self.headingToDirection(heading) #robots  (heading) to N, E, S, W
 		#self.recordWalls()
 		
-		
-		nextCell = self.doFlood().next()
-		
+		if((location[0] == int(self.oldLocation[0]) )and (location[1] == int(self.oldLocation[1]) )):
+			nextCell = next(self.modFloodfill())
+		else:
+			# robot was not able to reach previous goal
+			#find path to last step action from current robot position
+			print("# robot was not able to reach previous goal ")
+			print("#find path to last step action from current robot position")
+			return -1
+
 		self.printMaze()
 		#Debug prints
-		print "nextCell: "+str(nextCell)
-		print "Current Direction: "+str(direction)
-		print "mazeWalls["+str(PosC)+"]["+str(PosR)+"]: "+str(mazeWalls[PosC][PosR])
-	 	
-	 	# once exploreation  done find path
+		print("nextCell: "+str(nextCell))
+		print("Current Direction: "+str(direction))
+		print("mazeWalls["+str(PosC)+"]["+str(PosR)+"]: "+str(mazeWalls[PosC][PosR]))
+		
+		# once exploreation  done find path
 		#nextCell = self.findPath(nextCell)
 
-	 	stackNext.printst()
-		 
+		#stackNext.printst()
+		self.oldLocation=nextCell
+		return self.takeAction(nextCell, direction)
+
+	def takeAction(self,nextCell, direction):
+		global PosR ,PosC
 		if(nextCell == [-1,-1]):
-			print "Cannot find path"
+			print("Cannot find path")
 			return "Left"
 		elif nextCell[1] < PosR: #if next cell is South of robot. 
 			#based on the direction of the robot we need to move forward or turn.
@@ -238,28 +266,50 @@ class floodFill(object):
 				PosC = nextCell[1]
 				return (self.headingToRotation("forward") ,1)
 		else:
-			print "Fail."
+			print("Fail.")
 			return (self.headingToRotation("right") ,0)
 	 
 		 
-	def doFlood(self): #SCAN AND LABEL mazeDepth with distance (depth) values
+	def modFloodfill(self):
 		scanDepth =mazeDepth[0][0]
 		nextCell=[]
-		while(scanDepth < mazeDimension * mazeDimension -1): #(255 is the overflow)
+		while(not q.empty()): #(255 is the overflow)
+			item=q.get()
+			curr_x=item[0]
+			curr_y=item[1]
+			scanDepth =item[2]
 			scanDepth += 1
 			for x in range(0,mazeDimension):
 				for y in range(0,mazeDimension):
 					if mazeDepth[x][y] == -1 : #if cell hasn't been labeled (-1)
-						if ((x != 0 and mazeWalls[x][y][3] == 1 and mazeDepth[x-1][y] != -1 and mazeDepth[x-1][y] != scanDepth) #Monster IF looks at adjacent cells to the one being scanned
-						or (x != mazeDimension-1 and mazeWalls[x][y][1] == 1 and mazeDepth[x+1][y] != -1 and mazeDepth[x+1][y] != scanDepth)#If an adjactent cell isn't separated by a wall and has been 
-						or (y != 0 and mazeWalls[x][y][2] == 1 and mazeDepth[x][y-1] != -1 and mazeDepth[x][y-1] != scanDepth) # given a depth then the currently scanned cell is given
-						or (y != mazeDimension-1 and mazeWalls[x][y][0] == 1 and mazeDepth[x][y+1] != -1 and mazeDepth[x][y+1] != scanDepth)): # the current depth
-							print(x,y)
-							print(mazeWalls[x][y])
-							mazeDepth[x][y] = scanDepth
+						if (x != 0 and mazeWalls[x][y][3] == 1 and mazeDepth[x-1][y] != -1 and mazeDepth[x-1][y] != scanDepth):
+							mazeDepth[x][y] = mazeDepth[x-1][y] +1
 							nextCell=[x,y]
-							stackNext.push([x,y,scanDepth])
+							q.put([x,y,mazeDepth[x][y] ])
+							stackNext.push([x,y,mazeDepth[x][y] ])
 							yield nextCell
+
+						if (x != mazeDimension-1 and mazeWalls[x][y][1] == 1 and mazeDepth[x+1][y] != -1 and mazeDepth[x+1][y] != scanDepth):
+							mazeDepth[x][y] = mazeDepth[x+1][y] +1
+							nextCell=[x,y]
+							q.put([x,y,mazeDepth[x][y] ])
+							stackNext.push([x,y,mazeDepth[x][y]])
+							yield nextCell
+
+						if (y != 0 and mazeWalls[x][y][2] == 1 and mazeDepth[x][y-1] != -1 and mazeDepth[x][y-1] != scanDepth):
+							mazeDepth[x][y] = mazeDepth[x][y-1] +1
+							nextCell=[x,y]
+							q.put([x,y,mazeDepth[x][y]])
+							stackNext.push([x,y,mazeDepth[x][y] ])
+							yield nextCell
+
+						if (y != mazeDimension-1 and mazeWalls[x][y][0] == 1 and mazeDepth[x][y+1] != -1 and mazeDepth[x][y+1] != scanDepth):
+							mazeDepth[x][y] = mazeDepth[x][y+1] +1
+							nextCell=[x,y]
+							q.put([x,y,mazeDepth[x][y]])
+							stackNext.push([x,y,mazeDepth[x][y] ])
+							yield nextCell
+						
 			if mazeDepth[GoalR][GoalC] != -1: #if you have flooded enough to reach the goal position. STOP FLOODING!
 				nextCell=[GoalC,GoalR]
 				yield nextCell
@@ -267,6 +317,7 @@ class floodFill(object):
 		
 	 
 		yield nextCell
+
 	 
 	def findPath(self, nextCell): 
 		#Starting at the goal, find the shortest path back to the robot.
@@ -300,7 +351,7 @@ class floodFill(object):
 	 
 	#set wall at given direction in a cell
 	def cellSetWall(self, x, y, heading):
-		print( x,y, heading)
+		#print(( x,y, heading))
 		if(heading == "N"):
 			self.wallSetN(x,y)
 		elif(heading == "E"):
