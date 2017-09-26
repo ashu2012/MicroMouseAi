@@ -60,7 +60,7 @@ if __name__ == '__main__':
             rotation, movement = testrobot.next_move(sensing)
 
             #write robot actions
-            mazeObj.writeText("Robot position as "+str(robot_pos['location']) +" , "+str(robot_pos['heading']))
+            mazeObj.writeText("Previous Robot position as "+str(robot_pos['location']) +" , "+str(robot_pos['heading']))
             #mydata = raw_input('Prompt : enter for next move')
 
             # check for a reset
