@@ -52,7 +52,10 @@ class floodFill(object):
 		# :
 		# 15
 		 
+		self.previousTrip= False
+
 		mazeDimension = mazeDim
+		self.mazeDim=mazeDim
 		#Initial position and direction
 		PosR = location[0] #Row position
 		PosC = location[1] #Column position
@@ -82,14 +85,14 @@ class floodFill(object):
 				mazeDepth[i][j] = -1
 	 
 		  
-		mazeDepth[PosR][PosC] = scanDepth = 0 #initialize scan depth and set robot position cell to zero.
+		mazeDepth[PosR][PosC] = scanDepth = -1 #initialize scan depth and set robot position cell to zero.
 		#Iterate (scan) through maze once for each depth to flood. (Robot is at depth 0)
 
 		global q
 		q = queue.LifoQueue()
 
 		
-		q.put([0,0,1])
+		q.put([0,0,-1])
 
 		
 
@@ -183,15 +186,24 @@ class floodFill(object):
 		#self.recordWalls()
 		
 		if((location[0] == int(self.oldLocation[0]) )and (location[1] == int(self.oldLocation[1]) )):
-			nextCell = next(self.modFloodfill())
+			#nextCell = next(self.modFloodfill())
+			nextCell = self.modFloodfill()
+			self.previousTrip=False
+			pdb.set_trace()
 		else:
+			self.previousTrip=True
 			# robot was not able to reach previous goal
 			#find path to last step action from current robot position
 			print("# robot was not able to reach previous goal ")
 			print("#find path to last step action from current robot position")
 			#nextCell = q.get()
-			pdb.set_trace() 
-			return -1
+			pathList=self.findPathWhenStuck(location,self.oldLocation)
+			print(pathList)
+
+			if(pathList ==None):
+				pdb.set_trace()
+			nextCell = pathList[1]
+
 
 		self.printMaze()
 		#Debug prints
@@ -203,7 +215,9 @@ class floodFill(object):
 		#nextCell = self.findPath(nextCell)
 
 		#stackNext.printst()
-		self.oldLocation=nextCell
+		if self.previousTrip==False :
+			self.oldLocation=nextCell
+
 		return self.takeAction(nextCell, direction)
 
 	def takeAction(self,nextCell, direction):
@@ -277,99 +291,192 @@ class floodFill(object):
 	 
 		 
 	def modFloodfill(self):
-		scanDepth =mazeDepth[0][0]
+		#scanDepth =mazeDepth[currCellX][currCellY]
 		nextCell=[]
-		print("queue is not empty")
+		
 		global q
 
 		while(not q.empty()): #(255 is the overflow)
+			print("queue is not empty")
 			print(q.queue)
 			item=q.get()
 			curr_x=item[0]
 			curr_y=item[1]
-			scanDepth =item[2]
-			scanDepth += 1
+			if(mazeDepth[curr_x][curr_y]==-1 ):
+				scanDepth =item[2]
+				scanDepth += 1
+			else:
+				scanDepth =mazeDepth[curr_x][curr_y]
 			print(item)
-			for x in range(curr_x-1,curr_x+2):
-				for y in range(curr_y-1,curr_y+2):
-					if (x >=0 and x < mazeDimension) and (y >=0 and y < mazeDimension) and (mazeDepth[x][y] == -1) : #if cell hasn't been labeled (-1)
-						if (x != 0 and mazeWalls[x][y][3] == 1 and mazeDepth[x-1][y] != -1 and mazeDepth[x-1][y] != scanDepth):
-							mazeDepth[x][y] = mazeDepth[x-1][y] +1
-							nextCell=[x,y]
-							q.put([x,y,mazeDepth[x][y] ])
-							stackNext.push([x,y,mazeDepth[x][y] ])
-							
 
-						if (x != mazeDimension-1 and mazeWalls[x][y][1] == 1 and mazeDepth[x+1][y] != -1 and mazeDepth[x+1][y] != scanDepth):
-							mazeDepth[x][y] = mazeDepth[x+1][y] +1
-							nextCell=[x,y]
-							q.put([x,y,mazeDepth[x][y] ])
-							stackNext.push([x,y,mazeDepth[x][y]])
-							#yield nextCell
+			minDepthAtItem=self.getminDepthofAllneighbours(item[0],item[1])
+			print("minDepthAtItem=",minDepthAtItem)
+			print("mazeDepthAtItem=",mazeDepth[curr_x][curr_y])
+			if  minDepthAtItem+1 < scanDepth and (mazeDepth[curr_x][curr_y]!=-1 ) :
+				mazeDepth[curr_x][curr_y]=minDepthAtItem+1
+				q.put([item[0],item[1],minDepthAtItem])
+				currNodeneighbours=self.getExploredNeighbours(item[0],item[1])
+				for nodes in currNodeneighbours:
+					q.put([nodes[0],nodes[1],minDepthAtItem])
 
-						if (y != 0 and mazeWalls[x][y][2] == 1 and mazeDepth[x][y-1] != -1 and mazeDepth[x][y-1] != scanDepth):
-							mazeDepth[x][y] = mazeDepth[x][y-1] +1
-							nextCell=[x,y]
-							q.put([x,y,mazeDepth[x][y]])
-							stackNext.push([x,y,mazeDepth[x][y] ])
-							#yield nextCell
+			elif minDepthAtItem+1 < scanDepth and (mazeDepth[curr_x][curr_y]==-1 ) :
+				q.put([item[0],item[1],minDepthAtItem])
+				currNodeneighbours=self.getExploredNeighbours(item[0],item[1])
+				stackNext.push([item[0],item[1],minDepthAtItem ])
+				nextCell=[curr_x,curr_y]
+				for nodes in currNodeneighbours:
+					q.put([nodes[0],nodes[1],minDepthAtItem])
 
-						if (y != mazeDimension-1 and mazeWalls[x][y][0] == 1 and mazeDepth[x][y+1] != -1 and mazeDepth[x][y+1] != scanDepth):
-							mazeDepth[x][y] = mazeDepth[x][y+1] +1
-							nextCell=[x,y]
-							q.put([x,y,mazeDepth[x][y]])
-							stackNext.push([x,y,mazeDepth[x][y] ])
-							#yield nextCell
+			elif minDepthAtItem+1 == scanDepth and (mazeDepth[curr_x][curr_y]==-1 ) :
+				q.put([item[0],item[1],minDepthAtItem])
+				mazeDepth[curr_x][curr_y]=minDepthAtItem+1
+				currNodeneighbours=self.getUnExploredNeighbours(item[0],item[1])
+				stackNext.push([item[0],item[1],minDepthAtItem ])
+				nextCell=[curr_x,curr_y]
+				for nodes in currNodeneighbours:
+					q.put([nodes[0],nodes[1],minDepthAtItem+1])
+			else:
+				currNodeneighbours=self.getUnExploredNeighbours(item[0],item[1])
+				for nodes in currNodeneighbours:
+					nextCell=[nodes[0],nodes[1]]
+					q.put([nodes[0],nodes[1],mazeDepth[curr_x][curr_y]+1])
+
 			
 			if nextCell != []:
 				print(q.queue)
-				yield nextCell	
+				return nextCell	
 			else:
-				print("nextcell is  empty")
-				print(q.queue)
-				item2=q.get()
-				q.put(item2)
-				nextCell=[item2[0],item2[1]]
-				yield nextCell
-				pass
+				print("nextcell is empty")
+				continue
+				
 			if mazeDepth[GoalR][GoalC] != -1: #if you have flooded enough to reach the goal position. STOP FLOODING!
 				nextCell=[GoalC,GoalR]
-				yield nextCell
+				return nextCell
 			  
 		
-		print("queue is  empty")
-		yield nextCell
+		print("no unexplored cells  left")
+		return nextCell
 
-	""" 
+
+#this function finds the explored neghbour of given x,y coordinate in maze
+# no explore neighbour then emptylist
+	def getExploredNeighbours(self,curr_x,curr_y):
+		global mazeWalls
+		out_put=[]
+		for x in range(curr_x-1,curr_x+2):
+			for y in range(curr_y-1,curr_y+2):
+
+				if (x==curr_x+1 and y==curr_y+1) or(x==curr_x-1 and y==curr_y-1) or (x==curr_x+1 and y==curr_y-1)or (x==curr_x-1 and y==curr_y+1) or (x==curr_x and y==curr_y):
+					continue
+
+				if (x >=0 and x < mazeDimension) and (y >=0 and y < mazeDimension) and (mazeDepth[x][y] != -1) : #if cell hasn't been labeled (-1)
+					if ((x==curr_x-1 and y==curr_y) and mazeWalls[curr_x][curr_y][3] == 1 and mazeWalls[x][y][1]== 1 ):
+						out_put=out_put+[[x,y ,mazeDepth[x][y]]]
+						
+
+					if ((x==curr_x+1 and y==curr_y) and mazeWalls[curr_x][curr_y][1] == 1 and mazeWalls[x][y][3]== 1):
+						out_put=out_put+[[x,y ,mazeDepth[x][y]]]
+						#yield nextCell
+
+					if ((x==curr_x and y==curr_y-1) and mazeWalls[curr_x][curr_y][2] == 1 and mazeWalls[x][y][0]== 1):
+						out_put=out_put+[[x,y ,mazeDepth[x][y]]]
+
+					if ((x==curr_x and y==curr_y+1) and mazeWalls[curr_x][curr_y][0] == 1 and mazeWalls[x][y][2] == 1 ):
+						out_put=out_put+[[x,y ,mazeDepth[x][y]]]
+		
+		return out_put
+
+
+#this function finds the new unexplored neghbour of given x,y coordinate in maze
+# new member will be from n, e, s, w direction and also unexplored
+	def getUnExploredNeighbours(self,curr_x,curr_y):
+
+		global mazeWalls
+		out_put=[]
+		for x in range(curr_x-1,curr_x+2):
+			for y in range(curr_y-1,curr_y+2):
+
+				if (x==curr_x+1 and y==curr_y+1) or(x==curr_x-1 and y==curr_y-1) or (x==curr_x+1 and y==curr_y-1)or (x==curr_x-1 and y==curr_y+1) or (x==curr_x and y==curr_y):
+					continue
+
+				if(x==1 and y == 11):
+						print("test neighbour of =",curr_x," ",curr_y)
+						print(out_put)
+						print(mazeWalls[curr_x][curr_y])
+
+				if (x >=0 and x < mazeDimension) and (y >=0 and y < mazeDimension) and (mazeDepth[x][y] == -1) : #if cell hasn't been labeled (-1)
+
+
+					if ((x==curr_x-1 and y==curr_y) and mazeWalls[curr_x][curr_y][3] == 1 and mazeWalls[x][y][1]== 1 ):
+						out_put=out_put+[[x,y ,mazeDepth[x][y]]]
+						
+
+					if ((x==curr_x+1 and y==curr_y) and mazeWalls[curr_x][curr_y][1] == 1 and mazeWalls[x][y][3]== 1):
+						out_put=out_put+[[x,y ,mazeDepth[x][y]]]
+						print("test neighbour of =",curr_x," ",curr_y)
+						print(out_put)
+						#yield nextCell
+
+					if ((x==curr_x and y==curr_y-1) and mazeWalls[curr_x][curr_y][2] == 1 and mazeWalls[x][y][0]== 1):
+						out_put=out_put+[[x,y ,mazeDepth[x][y]]]
+
+					if ((x==curr_x and y==curr_y+1) and mazeWalls[curr_x][curr_y][0] == 1 and mazeWalls[x][y][2] == 1 ):
+						out_put=out_put+[[x,y ,mazeDepth[x][y]]]
+		
+		print("neighbours of =",curr_x," ",curr_y)
+		print(out_put)
+		return out_put
+
+#getminDeptofAllneighbours
+
+	def getminDepthofAllneighbours(self,curr_x,curr_y):
+
+		if curr_x==0  and curr_y==0:
+			return -1
+
+		neighbours=self.getExploredNeighbours(curr_x,curr_y)
+		mazeDepthList=[]
+		for currNode in neighbours:
+			mazeDepthList=mazeDepthList+[mazeDepth[currNode[0]][currNode[1]]]
+
+		mazeDepthList.sort()
+		print(mazeDepthList)
+		return mazeDepthList[0]
 	def findPathWhenStuck(self, sourceCell , targetCell): 
 		#Starting at the goal, find the shortest path back to the robot.
 		x = sourceCell[0] #These r and c are the coordinates of the cell being observed. (starting at the goal cell)
 		y = sourceCell[1]
 		scanDepth = mazeDepth[x][y] #this is the depth to the observed cell.
 		qtmp = queue.Queue()
-		qtmp.put
+		qtmp.put([x,y,scanDepth,[]])
+		
+		markedSet= set()
+		markedSet.add((x,y))
+
+		setofSerchedNodes = [0]*self.mazeDim #maze wall storage NESW
+		for j in range(0,self.mazeDim): #one way of creating nested list
+			setofSerchedNodes[j] = [0]*self.mazeDim
+
+		setofSerchedNodes[x][y]=1
+
 		while(not qtmp.empty()): 
-			#If a cell with one less depth is next to the observed cell (with no walls separating) Then OBSERVE THAT CELL NEXT!
-			#If that cell you want to observe next has the robot in it, 
-			if (r != mazeDimension and mazeWalls[r][c][2] == 1 and mazeDepth[r+1][c] == scanDepth-1):  #LOOK SOUTH (from observed cell)
-				if(scanDepth-1 == 0): return [r,c] #Return the next cell the robot should travel to. (if that cell is depth 0 (robot))
-				r += 1
-			elif (r != 0 and mazeWalls[r][c][0] != 1 and mazeDepth[r-1][c] == scanDepth-1): #LOOK NORTH 
-				if(scanDepth-1 == 0): return [r,c] 
-				r -= 1
-			elif (c != mazeDimension and mazeWalls[r][c][1] != 1 and mazeDepth[r][c+1] == scanDepth-1): #LOOK EAST
-				if(scanDepth-1 == 0): return [r,c]
-				c += 1
-			elif (c != 0 and mazeWalls[r][c][3] != 1 and mazeDepth[r][c-1] == scanDepth-1): #LOOK WEST
-				if(scanDepth-1 == 0): return [r,c]
-				c -= 1
-			else:
-				return [-1,-1]
-				 
-			scanDepth -=1 #Seet the new depth of the observed cell.
-	 
-		return [-1,-1]
-	"""
+			scanDepth=scanDepth+1
+			node=qtmp.get()
+			neighbours=self.getExploredNeighbours(node[0],node[1])
+
+			for currNode in neighbours:
+				if(currNode[0]==targetCell[0] and currNode[1]==targetCell[1]):
+					
+					return node[3]+[[node[0],node[1]] ,[currNode[0],currNode[1]]]
+				else:
+				#add to queue to serch using breadfirst serach
+					if(setofSerchedNodes[currNode[0]][currNode[1]]!=1):
+						setofSerchedNodes[currNode[0]][currNode[1]]=1
+						qtmp.put([currNode[0],currNode[1],scanDepth,node[3]+[[node[0],node[1]]] ]  )
+
+
+		return None
+	
 
 	def findPath(self, nextCell): 
 		#Starting at the goal, find the shortest path back to the robot.
