@@ -189,7 +189,7 @@ class floodFill(object):
 			#nextCell = next(self.modFloodfill())
 			nextCell = self.modFloodfill()
 			self.previousTrip=False
-			pdb.set_trace()
+			#pdb.set_trace()
 		else:
 			self.previousTrip=True
 			# robot was not able to reach previous goal
@@ -199,7 +199,7 @@ class floodFill(object):
 			#nextCell = q.get()
 			pathList=self.findPathWhenStuck(location,self.oldLocation)
 			print(pathList)
-
+			#pdb.set_trace()
 			if(pathList ==None):
 				pdb.set_trace()
 			nextCell = pathList[1]
@@ -286,8 +286,8 @@ class floodFill(object):
 				PosC = nextCell[1]
 				return (self.headingToRotation("forward") ,1)
 		else:
-			print("Fail.")
-			return (self.headingToRotation("right") ,0)
+			print("same location.")
+			return (self.headingToRotation("forward") ,0)
 	 
 		 
 	def modFloodfill(self):
@@ -295,6 +295,7 @@ class floodFill(object):
 		nextCell=[]
 		
 		global q
+		global mazeDepth
 
 		while(not q.empty()): #(255 is the overflow)
 			print("queue is not empty")
@@ -306,40 +307,51 @@ class floodFill(object):
 				scanDepth =item[2]
 				scanDepth += 1
 			else:
-				scanDepth =mazeDepth[curr_x][curr_y]
-			print(item)
+				scanDepth =min(mazeDepth[curr_x][curr_y],item[2]+1)
+			
 
 			minDepthAtItem=self.getminDepthofAllneighbours(item[0],item[1])
+			print(item)
 			print("minDepthAtItem=",minDepthAtItem)
 			print("mazeDepthAtItem=",mazeDepth[curr_x][curr_y])
-			if  minDepthAtItem+1 < scanDepth and (mazeDepth[curr_x][curr_y]!=-1 ) :
+			print("scanDepth=",scanDepth)
+			if  minDepthAtItem+1 < mazeDepth[curr_x][curr_y] and (mazeDepth[curr_x][curr_y]!=-1 ) :
+				print("step1")
 				mazeDepth[curr_x][curr_y]=minDepthAtItem+1
 				q.put([item[0],item[1],minDepthAtItem])
 				currNodeneighbours=self.getExploredNeighbours(item[0],item[1])
 				for nodes in currNodeneighbours:
-					q.put([nodes[0],nodes[1],minDepthAtItem])
+					q.put([nodes[0],nodes[1],minDepthAtItem+1])
 
 			elif minDepthAtItem+1 < scanDepth and (mazeDepth[curr_x][curr_y]==-1 ) :
+				print("step2")
+				mazeDepth[curr_x][curr_y]=minDepthAtItem+1
 				q.put([item[0],item[1],minDepthAtItem])
 				currNodeneighbours=self.getExploredNeighbours(item[0],item[1])
 				stackNext.push([item[0],item[1],minDepthAtItem ])
-				nextCell=[curr_x,curr_y]
+				nextCell=[]
 				for nodes in currNodeneighbours:
-					q.put([nodes[0],nodes[1],minDepthAtItem])
+					q.put([nodes[0],nodes[1],minDepthAtItem+1])
 
-			elif minDepthAtItem+1 == scanDepth and (mazeDepth[curr_x][curr_y]==-1 ) :
-				q.put([item[0],item[1],minDepthAtItem])
+			elif minDepthAtItem+1 >= scanDepth and (mazeDepth[curr_x][curr_y]==-1 ) :
+				print("step3")
+				
 				mazeDepth[curr_x][curr_y]=minDepthAtItem+1
 				currNodeneighbours=self.getUnExploredNeighbours(item[0],item[1])
 				stackNext.push([item[0],item[1],minDepthAtItem ])
 				nextCell=[curr_x,curr_y]
+				#q.put([item[0],item[1],minDepthAtItem])
 				for nodes in currNodeneighbours:
 					q.put([nodes[0],nodes[1],minDepthAtItem+1])
+
+				q.put([item[0],item[1],minDepthAtItem+1])
 			else:
+				print("step4")
+				#continue
 				currNodeneighbours=self.getUnExploredNeighbours(item[0],item[1])
 				for nodes in currNodeneighbours:
 					nextCell=[nodes[0],nodes[1]]
-					q.put([nodes[0],nodes[1],mazeDepth[curr_x][curr_y]+1])
+					q.put([nodes[0],nodes[1],mazeDepth[curr_x][curr_y]])
 
 			
 			if nextCell != []:
@@ -362,6 +374,7 @@ class floodFill(object):
 # no explore neighbour then emptylist
 	def getExploredNeighbours(self,curr_x,curr_y):
 		global mazeWalls
+		global mazeDepth
 		out_put=[]
 		for x in range(curr_x-1,curr_x+2):
 			for y in range(curr_y-1,curr_y+2):
@@ -384,6 +397,9 @@ class floodFill(object):
 					if ((x==curr_x and y==curr_y+1) and mazeWalls[curr_x][curr_y][0] == 1 and mazeWalls[x][y][2] == 1 ):
 						out_put=out_put+[[x,y ,mazeDepth[x][y]]]
 		
+		print("explored neighbours of =",curr_x," ",curr_y)
+		print(out_put)
+
 		return out_put
 
 
@@ -392,6 +408,7 @@ class floodFill(object):
 	def getUnExploredNeighbours(self,curr_x,curr_y):
 
 		global mazeWalls
+		global mazeDepth
 		out_put=[]
 		for x in range(curr_x-1,curr_x+2):
 			for y in range(curr_y-1,curr_y+2):
@@ -399,10 +416,6 @@ class floodFill(object):
 				if (x==curr_x+1 and y==curr_y+1) or(x==curr_x-1 and y==curr_y-1) or (x==curr_x+1 and y==curr_y-1)or (x==curr_x-1 and y==curr_y+1) or (x==curr_x and y==curr_y):
 					continue
 
-				if(x==1 and y == 11):
-						print("test neighbour of =",curr_x," ",curr_y)
-						print(out_put)
-						print(mazeWalls[curr_x][curr_y])
 
 				if (x >=0 and x < mazeDimension) and (y >=0 and y < mazeDimension) and (mazeDepth[x][y] == -1) : #if cell hasn't been labeled (-1)
 
@@ -413,17 +426,18 @@ class floodFill(object):
 
 					if ((x==curr_x+1 and y==curr_y) and mazeWalls[curr_x][curr_y][1] == 1 and mazeWalls[x][y][3]== 1):
 						out_put=out_put+[[x,y ,mazeDepth[x][y]]]
-						print("test neighbour of =",curr_x," ",curr_y)
-						print(out_put)
+						
 						#yield nextCell
 
 					if ((x==curr_x and y==curr_y-1) and mazeWalls[curr_x][curr_y][2] == 1 and mazeWalls[x][y][0]== 1):
 						out_put=out_put+[[x,y ,mazeDepth[x][y]]]
+						print("test neighbour of =",curr_x," ",curr_y)
+						print(out_put)
 
 					if ((x==curr_x and y==curr_y+1) and mazeWalls[curr_x][curr_y][0] == 1 and mazeWalls[x][y][2] == 1 ):
 						out_put=out_put+[[x,y ,mazeDepth[x][y]]]
 		
-		print("neighbours of =",curr_x," ",curr_y)
+		print("unexplored neighbours of =",curr_x," ",curr_y)
 		print(out_put)
 		return out_put
 
@@ -431,12 +445,16 @@ class floodFill(object):
 
 	def getminDepthofAllneighbours(self,curr_x,curr_y):
 
+		global mazeWalls
+		global mazeDepth
 		if curr_x==0  and curr_y==0:
-			return -1
+			return mazeDepth[0][0]
 
 		neighbours=self.getExploredNeighbours(curr_x,curr_y)
+		print("getminDepthofAllneighbours")
 		mazeDepthList=[]
 		for currNode in neighbours:
+			print(currNode)
 			mazeDepthList=mazeDepthList+[mazeDepth[currNode[0]][currNode[1]]]
 
 		mazeDepthList.sort()
@@ -463,7 +481,7 @@ class floodFill(object):
 			scanDepth=scanDepth+1
 			node=qtmp.get()
 			neighbours=self.getExploredNeighbours(node[0],node[1])
-
+			neighbours=neighbours+self.getUnExploredNeighbours(node[0],node[1])
 			for currNode in neighbours:
 				if(currNode[0]==targetCell[0] and currNode[1]==targetCell[1]):
 					
@@ -524,7 +542,7 @@ class floodFill(object):
 		global mazeWalls
 		mazeWalls[x][y][2] = 1
 		if y > 0: # if there is then set the "same" wall in the cell right below (south wall)
-			mazeWalls[x][y][0] = 1
+			mazeWalls[x][y-1][0] = 1
 		 
 	def wallSetE(self,x,y):
 		global mazeWalls
