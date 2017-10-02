@@ -50,6 +50,9 @@ class Robot(object):
         #rotation = 0
         #movement = 0
 
+        if rotation=='Reset' and movement== 'Reset':
+            self.update_move( [0,0] , 'up')
+
         return rotation, movement
 
 
