@@ -1,7 +1,7 @@
 from maze import Maze
 import turtle
 import sys
-
+import random
 
 class DrawMaze (object):
 
@@ -26,8 +26,9 @@ class DrawMaze (object):
 
 		self.textTurtle= turtle.Turtle()
 		self.textTurtle.penup()
-		self.textTurtle.goto(window.window_width()/-3 ,window.window_height()/-3)
+		self.textTurtle.goto(window.window_width()/-2 -10,window.window_height()/-2 +10)
 		self.textTurtle.pendown()
+		self.turtlecolor='black'
 		# maze centered on (0,0), squares are 20 units in length.
 		sq_size = 20
 		self.mazeDim=testmaze.dim
@@ -77,7 +78,16 @@ class DrawMaze (object):
 		origin = self.mazeDim * sq_size / -2 
 		mytutle=self.wallyTurtle
 		mytutle.speed(1)
-		mytutle.color("red")
+		if x== 0 and y ==1 :
+			newColor=random.choice(['red', 'green' ])
+			if newColor != self.turtlecolor :
+				mytutle.color(newColor)
+				self.turtlecolor= newColor
+			else:
+				mytutle.color('blue')
+				self.turtlecolor= 'blue'
+				#fins another color
+			mytutle.pensize(4)
 		mytutle.pendown()
 
 		if heading == 'u':
