@@ -6,6 +6,7 @@ import sys
 from floodfill import floodFill
 import djkistra
 from depthFirstSearch import dfs
+from bfs import bfs
 
 class AlgoPackage(object):
 	def __init__(self, typeOfAlgo , location, heading,goal_bounds, mazeDim):
@@ -27,6 +28,8 @@ class AlgoPackage(object):
 			self.algoObj =  floodFill(location, heading, goal_bounds, self.mazeDim)	
 		elif self.algoType == "dfs":
 			self.algoObj =  dfs(location, heading, goal_bounds, self.mazeDim)	
+		elif self.algoType == "bfs":
+			self.algoObj =  bfs(location, heading, goal_bounds, self.mazeDim)	
 		elif self.algoType == "random":
 			self.algoObj= None
 		else:
@@ -58,6 +61,12 @@ class AlgoPackage(object):
 		print((rotation,movement))
 		return (rotation,movement)
 
+	def callBfs(self , sensing ,location,direction ,oldLocation ,oldHeading):
+		print("calling BFS algo")
+		(rotation,movement)=self.algoObj.nextStep(sensing ,location,direction ,oldLocation ,oldHeading)
+		print((rotation,movement))
+		return (rotation,movement)
+
 	def callDjkistra(self ,sensing):
 		print( "calling djisktra shortest path for non negative weights")
 		pass
@@ -75,7 +84,10 @@ class AlgoPackage(object):
 			return self.callFloodfill(sensing ,location,direction ,oldLocation ,oldHeading)
 			
 		elif self.algoType == "dfs":
-			return self.callDfs(sensing ,location,direction ,oldLocation ,oldHeading)
+			return self.callDfs(sensing ,location,direction ,oldLocation ,oldHeading)	
+
+		elif self.algoType == "bfs":
+			return self.callBfs(sensing ,location,direction ,oldLocation ,oldHeading)
 		else:
 			print("No specific  algorithm  mentioned")
 
