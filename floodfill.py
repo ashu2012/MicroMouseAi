@@ -52,6 +52,7 @@ class floodFill(object):
 		# :
 		# 15
 		 
+		self.isGoalReached= False
 		self.previousTrip= False
 
 		mazeDimension = mazeDim
@@ -72,12 +73,13 @@ class floodFill(object):
 			for k in range(0,mazeDim): 
 				mazeWalls[j][k] = [0]*4
 		 
+
+		global mazeDepth
 		#Initializing the depth array 16x16 signed int
 		mazeDepth = [0]*mazeDim #another way of creating nested list (more efficient)
 		for i, item in enumerate(mazeDepth): 
 			mazeDepth[i] = [0]*mazeDim
 
-		global mazeDepth
 		 
 		#"zero" out depth (Negative one is an unscanned cell)
 		for i, index in enumerate(mazeDepth):
@@ -221,21 +223,28 @@ class floodFill(object):
 		self.updateWalls(sensing,location , heading)
 		direction = self.headingToDirection(heading) #robots  (heading) to N, E, S, W
 		#self.recordWalls()
-		
-		if((location[0] == int(self.oldLocation[0]) )and (location[1] == int(self.oldLocation[1]) )):
+			
+		if(self.isGoalReached==False and (location[0] == int(self.oldLocation[0]) )and (location[1] == int(self.oldLocation[1]) )):
 			#nextCell = next(self.modFloodfill())
 			nextCell = self.modFloodfill()
 			self.previousTrip=False
 			#pdb.set_trace()
 			#if you have flooded enough to reach the goal position. STOP FLOODING!
-			if self.ifreachedGoal(location)== True: 
-				while(not q.empty()):
-					self.modFloodfill()
+			if self.ifreachedGoal(location)== True:
+				self.isGoalReached= True 
 				print("goal  is reached")
-				self.reset()
-				return  ('Reset', 'Reset')
+				
 				#return  self.takeAction(nextCell, direction)
-
+		elif(self.isGoalReached==True and  (location[0] == int(self.oldLocation[0]) )and (location[1] == int(self.oldLocation[1]))):
+				if not q.empty():
+					nextCell =self.modFloodfill()
+					self.previousTrip=False
+					if nextCell == []:
+						self.reset()
+						return  ('Reset', 'Reset')
+				else:
+					self.reset()
+					return  ('Reset', 'Reset')
 		else:
 			self.previousTrip=True
 			# robot was not able to reach previous goal
@@ -600,11 +609,11 @@ class floodFill(object):
 				qtmp.put( [r,c])
 				r -= 1
 			else:
-				print(qtmp.queue) 
-				print(mazeWalls[r][c]) 
-				print(r,c)
-				print(mazeDepth[r][c]) 
-				pdb.set_trace()
+				#print(qtmp.queue) 
+				#print(mazeWalls[r][c]) 
+				#print(r,c)
+				#print(mazeDepth[r][c]) 
+				#pdb.set_trace()
 				#continue
 				return qtmp
 				 

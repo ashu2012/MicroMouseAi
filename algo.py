@@ -5,6 +5,7 @@ import turtle
 import sys
 from floodfill import floodFill
 import djkistra
+from depthFirstSearch import dfs
 
 class AlgoPackage(object):
 	def __init__(self, typeOfAlgo , location, heading,goal_bounds, mazeDim):
@@ -24,6 +25,8 @@ class AlgoPackage(object):
 			self.algoObj = Djkistra(location, heading, goal_bounds, self.mazeDim  )
 		elif self.algoType == "floodfill":
 			self.algoObj =  floodFill(location, heading, goal_bounds, self.mazeDim)	
+		elif self.algoType == "dfs":
+			self.algoObj =  dfs(location, heading, goal_bounds, self.mazeDim)	
 		elif self.algoType == "random":
 			self.algoObj= None
 		else:
@@ -48,6 +51,12 @@ class AlgoPackage(object):
 		return (rotation,movement)
 
 
+	def callDfs(self , sensing ,location,direction ,oldLocation ,oldHeading):
+		print("calling DFS algo")
+		(rotation,movement)=self.algoObj.nextStep(sensing ,location,direction ,oldLocation ,oldHeading)
+
+		print((rotation,movement))
+		return (rotation,movement)
 
 	def callDjkistra(self ,sensing):
 		print( "calling djisktra shortest path for non negative weights")
@@ -64,6 +73,9 @@ class AlgoPackage(object):
 
 		elif self.algoType == "floodfill":
 			return self.callFloodfill(sensing ,location,direction ,oldLocation ,oldHeading)
+			
+		elif self.algoType == "dfs":
+			return self.callDfs(sensing ,location,direction ,oldLocation ,oldHeading)
 		else:
 			print("No specific  algorithm  mentioned")
 
