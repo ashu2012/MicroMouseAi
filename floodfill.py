@@ -8,7 +8,7 @@ import sys
 import pdb
 import numpy as np
 import queue
-
+from pathOptimisation import pathOptimizer
 
 	
 class Stack:
@@ -44,6 +44,8 @@ class floodFill(object):
 		global PosR 
 		global PosC, direction  #This is needed to change the value of these variables
 		global GoalR , GoalC ,mazeDepth ,mazeDimension ,scanDepth 
+		global pathOptimizerObj
+		pathOptimizerObj= pathOptimizer()
 		#Assuming maze is 16x16... Robot starts in south west corner.
 		#Cell 0,0 (Rows, Columns) is in the Northwest corner.
 		#global oldLocation 
@@ -209,7 +211,9 @@ class floodFill(object):
 			return self.takeAction(nextCell, direction)
 		else:
 			print("error")
-			return -1
+			nextCell =[self.oldLocation[0],self.oldLocation[1]]
+			return self.takeAction(nextCell, direction)
+			#return -1
 
 
 	def nextStepExploration(self ,sensing ,location,heading, oldLocation , oldHeading ):
@@ -286,8 +290,17 @@ class floodFill(object):
 		elif nextCell[1] < PosR: #if next cell is South of robot. 
 			#based on the direction of the robot we need to move forward or turn.
 			if(direction == "S"): 
-				PosR = nextCell[0]
-				return (self.headingToRotation("forward") ,1)
+				if(PosR -1 == nextCell[1]):
+					PosR = nextCell[1]
+					return (self.headingToRotation("forward") ,1)
+				elif(PosR -2 == nextCell[1]):
+					PosR = nextCell[1]
+					return (self.headingToRotation("forward") ,2)
+				elif(PosR -3 == nextCell[1]):
+					PosR = nextCell[1]
+					return (self.headingToRotation("forward") ,3)
+				else:
+					return (self.headingToRotation("forward") ,1)
 			if(direction == "E"): 
 				direction = "S"
 				return (self.headingToRotation("right") ,1)
@@ -303,8 +316,18 @@ class floodFill(object):
 				direction = "E"
 				return (self.headingToRotation("right") ,1)
 			if(direction == "E"): 
-				PosC = nextCell[1]
-				return (self.headingToRotation("forward") ,1)
+				if(PosC +1 == nextCell[0]):
+					PosC = nextCell[0]
+					return (self.headingToRotation("forward") ,1)
+				elif(PosC +2 == nextCell[0]):
+					PosC = nextCell[0]
+					return (self.headingToRotation("forward") ,2)
+				elif(PosC +3 == nextCell[0]):
+					PosC = nextCell[0]
+					return (self.headingToRotation("forward") ,3)
+				else:
+					return (self.headingToRotation("forward") ,1)
+				
 			if(direction == "S"): 
 				direction = "E"
 				return (self.headingToRotation("left") ,1)
@@ -315,8 +338,17 @@ class floodFill(object):
 			#based on the direction of the robot we need to move forward or turn.
 			if(direction == "N"): 
 				direction = "N"
-				PosR = nextCell[0]
-				return (self.headingToRotation("forward") ,1)
+				if(PosR +1 == nextCell[1]):
+					PosR = nextCell[1]
+					return (self.headingToRotation("forward") ,1)
+				elif(PosR +2 == nextCell[1]):
+					PosR = nextCell[1]
+					return (self.headingToRotation("forward") ,2)
+				elif(PosR +3 == nextCell[1]):
+					PosR = nextCell[1]
+					return (self.headingToRotation("forward") ,3)
+				else:
+					return (self.headingToRotation("forward") ,1)
 			if(direction == "E"): 
 				direction = "N"
 				return (self.headingToRotation("left") ,1)
@@ -338,8 +370,19 @@ class floodFill(object):
 				direction = "W"
 				return (self.headingToRotation("right") ,1)
 			if(direction == "W"):
-				PosC = nextCell[1]
-				return (self.headingToRotation("forward") ,1)
+				if(PosC -1 == nextCell[0]):
+					PosC = nextCell[0]
+					#pdb.set_trace()
+					return (self.headingToRotation("forward") ,1)
+				elif(PosC -2 == nextCell[0]):
+					PosC = nextCell[0]
+					return (self.headingToRotation("forward") ,2)
+				elif(PosC -3 == nextCell[0]):
+					PosC = nextCell[0]
+					return (self.headingToRotation("forward") ,3)
+				else:
+					return (self.headingToRotation("forward") ,1)
+
 		else:
 			print("same location.")
 			return (self.headingToRotation("forward") ,0)
@@ -586,6 +629,8 @@ class floodFill(object):
 			if (r != mazeDimension and mazeWalls[r][c][2] == 1 and mazeDepth[r][c-1] == scanDepth-1):  #LOOK SOUTH (from observed cell)
 				if(scanDepth-1 == 0): 
 					qtmp.put( [r,c])
+					#pdb.set_trace()
+					qtmp.queue=pathOptimizerObj.process(qtmp.queue) 
 					return qtmp 
 					#Return the next cell the robot should travel to. (if that cell is depth 0 (robot))
 				qtmp.put( [r,c])
@@ -593,18 +638,24 @@ class floodFill(object):
 			elif (r != -1 and mazeWalls[r][c][0] == 1 and mazeDepth[r][c+1] == scanDepth-1): #LOOK NORTH 
 				if(scanDepth-1 == 0):
 					qtmp.put( [r,c])
+					#pdb.set_trace()
+					qtmp.queue=pathOptimizerObj.process(qtmp.queue) 
 					return qtmp 
 				qtmp.put( [r,c])
 				c += 1
 			elif (c != mazeDimension and mazeWalls[r][c][1] == 1 and mazeDepth[r+1][c] == scanDepth-1): #LOOK EAST
 				if(scanDepth-1 == 0): 
 					qtmp.put( [r,c])
+					#pdb.set_trace()
+					qtmp.queue=pathOptimizerObj.process(qtmp.queue) 
 					return qtmp 
 				qtmp.put( [r,c])
 				r += 1
 			elif (c != -1 and mazeWalls[r][c][3] == 1 and mazeDepth[r-1][c] == scanDepth-1): #LOOK WEST
 				if(scanDepth-1 == 0): 
 					qtmp.put( [r,c])
+					#pdb.set_trace()
+					qtmp.queue=pathOptimizerObj.process(qtmp.queue) 
 					return qtmp 
 				qtmp.put( [r,c])
 				r -= 1
@@ -619,7 +670,9 @@ class floodFill(object):
 				 
 			scanDepth -=1 #Seet the new depth of the observed cell.
 	
-		print(qtmp.queue) 
+		print(qtmp.queue)
+		#pdb.set_trace()
+		qtmp.queue=pathOptimizerObj.process(qtmp.queue) 
 		return qtmp
 	 
 	 

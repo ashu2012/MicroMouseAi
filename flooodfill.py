@@ -10,7 +10,7 @@ import numpy as np
 
 class floodFill(object):
 	def __init__(self, location, heading, goal_bounds, mazeDim):
-		print "############################BEGIN FLood fill #############################"
+		print "############################ BEGIN FLood Fill #############################"
 		#Assuming maze is 16x16... Robot starts in south west corner.
 		#Cell 0,0 (Rows, Columns) is in the Northwest corner.
 		 
@@ -45,7 +45,7 @@ class floodFill(object):
 	# next step the mouse should take.
 	def nextStep():
 		global mazeWalls, PosR, PosC, direction #This is needed to change the value of these variables
-		print "#####NEXT STEP"
+		print "#####  NEXT STEP ####################################"
 		 
 		recordWalls()
 		doFlood()
