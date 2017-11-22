@@ -9,7 +9,7 @@ from depthFirstSearch import dfs
 from bfs import bfs
 
 class AlgoPackage(object):
-	def __init__(self, typeOfAlgo , location, heading,goal_bounds, mazeDim):
+	def __init__(self, typeOfAlgo , location, heading,goal_bounds, mazeDim, exploreAfterGoalReached):
 
 		"""
 		taking type of algo
@@ -21,15 +21,16 @@ class AlgoPackage(object):
 		self.location =  location
 		self.heading = heading
 		self.goal_bounds = goal_bounds
+		self.exploreAfterGoalReached=exploreAfterGoalReached
 		#self.graphAdjacencyMatrix=self.buildAdjacencyGraph(self.mazeObj)
 		if self.algoType == "Djskitra":
-			self.algoObj = Djkistra(location, heading, goal_bounds, self.mazeDim  )
+			self.algoObj = Djkistra(location, heading, goal_bounds, self.mazeDim ,exploreAfterGoalReached  )
 		elif self.algoType == "floodfill":
-			self.algoObj =  floodFill(location, heading, goal_bounds, self.mazeDim)	
+			self.algoObj =  floodFill(location, heading, goal_bounds, self.mazeDim ,exploreAfterGoalReached)	
 		elif self.algoType == "dfs":
-			self.algoObj =  dfs(location, heading, goal_bounds, self.mazeDim)	
+			self.algoObj =  dfs(location, heading, goal_bounds, self.mazeDim ,exploreAfterGoalReached)	
 		elif self.algoType == "bfs":
-			self.algoObj =  bfs(location, heading, goal_bounds, self.mazeDim)	
+			self.algoObj =  bfs(location, heading, goal_bounds, self.mazeDim ,exploreAfterGoalReached)	
 		elif self.algoType == "random":
 			self.algoObj= None
 		else:

@@ -35,7 +35,7 @@ class Stack:
 
 
 class floodFill(object):
-	def __init__(self, location, heading, goal_bounds, mazeDim):
+	def __init__(self, location, heading, goal_bounds, mazeDim , exploreAfterGoalReached=False):
 		print("############################BEGIN FLood fill #############################")
 
 		global stackNext 
@@ -45,6 +45,8 @@ class floodFill(object):
 		global PosC, direction  #This is needed to change the value of these variables
 		global GoalR , GoalC ,mazeDepth ,mazeDimension ,scanDepth 
 		global pathOptimizerObj
+		global exploreAfterGoalReached 
+		exploreAfterGoalReached= False
 		pathOptimizerObj= pathOptimizer()
 		#Assuming maze is 16x16... Robot starts in south west corner.
 		#Cell 0,0 (Rows, Columns) is in the Northwest corner.
@@ -221,6 +223,8 @@ class floodFill(object):
 		print("previous location:" ,self.oldLocation)
 		print("currentCell: "+str(location))
 		global PosR ,PosC
+		global  exploreAfterGoalReached
+
 		PosR = location[1] #Row position
 		PosC = location[0] #Column position
 		
@@ -240,14 +244,21 @@ class floodFill(object):
 				
 				#return  self.takeAction(nextCell, direction)
 		elif(self.isGoalReached==True and  (location[0] == int(self.oldLocation[0]) )and (location[1] == int(self.oldLocation[1]))):
-				if not q.empty():
+				if exploreAfterGoalReached and not q.empty():
 					nextCell =self.modFloodfill()
 					self.previousTrip=False
 					if nextCell == []:
 						self.reset()
 						return  ('Reset', 'Reset')
 				else:
+					nextCell = []
+					#empty queue to complete calculations
+					while(not q.empty()):
+						self.modFloodfill()
+					
+					self.previousTrip=False
 					self.reset()
+					#pdb.set_trace()
 					return  ('Reset', 'Reset')
 		else:
 			self.previousTrip=True
@@ -260,7 +271,7 @@ class floodFill(object):
 			print(pathList)
 			#pdb.set_trace()
 			if(pathList ==None):
-				pdb.set_trace()
+				#pdb.set_trace()
 			nextCell = pathList[1]
 
 
