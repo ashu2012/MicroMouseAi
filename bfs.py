@@ -37,7 +37,7 @@ class Stack:
 
 
 class bfs(object):
-	def __init__(self, location, heading, goal_bounds, mazeDim):
+	def __init__(self, location, heading, goal_bounds, mazeDim , exploringAfterGoalReached=False):
 		print("############################BEGIN FLood fill #############################")
 
 		global stackNext 
@@ -50,7 +50,7 @@ class bfs(object):
 
 		global pathOptimizerObj
 		global exploreAfterGoalReached 
-		exploreAfterGoalReached= False
+		exploreAfterGoalReached= exploringAfterGoalReached
 		pathOptimizerObj= pathOptimizer()
 
 		#Assuming maze is 16x16... Robot starts in south west corner.
@@ -253,11 +253,11 @@ class bfs(object):
 						return  ('Reset', 'Reset')
 			else:
 				nextCell = []
-					#empty queue to complete calculations
-					while(not q.empty()):
-						self.modFloodfill()
-					
-					self.previousTrip=False
+				#empty queue to complete calculations
+				while(not q.empty()):
+					self.modFloodfill()
+				
+				self.previousTrip=False
 
 				self.reset()
 				return  ('Reset', 'Reset')
@@ -271,8 +271,8 @@ class bfs(object):
 			pathList=self.findPathWhenStuck(location,self.oldLocation)
 			print(pathList)
 			#pdb.set_trace()
-			if(pathList ==None):
-				pdb.set_trace()
+			#if(pathList ==None):
+				#pdb.set_trace()
 			nextCell = pathList[1]
 
 

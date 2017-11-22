@@ -35,7 +35,7 @@ class Stack:
 
 
 class floodFill(object):
-	def __init__(self, location, heading, goal_bounds, mazeDim , exploreAfterGoalReached=False):
+	def __init__(self, location, heading, goal_bounds, mazeDim , exploringAfterGoalReached=False):
 		print("############################BEGIN FLood fill #############################")
 
 		global stackNext 
@@ -46,7 +46,7 @@ class floodFill(object):
 		global GoalR , GoalC ,mazeDepth ,mazeDimension ,scanDepth 
 		global pathOptimizerObj
 		global exploreAfterGoalReached 
-		exploreAfterGoalReached= False
+		exploreAfterGoalReached= exploringAfterGoalReached
 		pathOptimizerObj= pathOptimizer()
 		#Assuming maze is 16x16... Robot starts in south west corner.
 		#Cell 0,0 (Rows, Columns) is in the Northwest corner.
@@ -255,7 +255,6 @@ class floodFill(object):
 				#empty queue to complete calculations
 				while(not q.empty()):
 					self.modFloodfill()
-				
 				self.previousTrip=False
 				self.reset()
 				#pdb.set_trace()
@@ -270,7 +269,7 @@ class floodFill(object):
 			pathList=self.findPathWhenStuck(location,self.oldLocation)
 			print(pathList)
 			#pdb.set_trace()
-			if(pathList ==None):
+			#if(pathList ==None):
 				#pdb.set_trace()
 			nextCell = pathList[1]
 
