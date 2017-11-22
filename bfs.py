@@ -9,6 +9,8 @@ import pdb
 import numpy as np
 import queue
 
+from pathOptimisation import pathOptimizer
+
 
 	
 class Stack:
@@ -44,6 +46,13 @@ class bfs(object):
 		global PosR 
 		global PosC, direction  #This is needed to change the value of these variables
 		global GoalR , GoalC ,mazeDepth ,mazeDimension ,scanDepth 
+
+
+		global pathOptimizerObj
+		global exploreAfterGoalReached 
+		exploreAfterGoalReached= False
+		pathOptimizerObj= pathOptimizer()
+
 		#Assuming maze is 16x16... Robot starts in south west corner.
 		#Cell 0,0 (Rows, Columns) is in the Northwest corner.
 		#global oldLocation 
@@ -236,15 +245,22 @@ class bfs(object):
 				
 				#return  self.takeAction(nextCell, direction)
 		elif(self.isGoalReached==True and  (location[0] == int(self.oldLocation[0]) )and (location[1] == int(self.oldLocation[1]))):
-				if not q.empty():
+			if exploreAfterGoalReached and not q.empty():
 					nextCell =self.modFloodfill()
 					self.previousTrip=False
 					if nextCell == []:
 						self.reset()
 						return  ('Reset', 'Reset')
-				else:
-					self.reset()
-					return  ('Reset', 'Reset')
+			else:
+				nextCell = []
+					#empty queue to complete calculations
+					while(not q.empty()):
+						self.modFloodfill()
+					
+					self.previousTrip=False
+
+				self.reset()
+				return  ('Reset', 'Reset')
 		else:
 			self.previousTrip=True
 			# robot was not able to reach previous goal
@@ -286,8 +302,17 @@ class bfs(object):
 		elif nextCell[1] < PosR: #if next cell is South of robot. 
 			#based on the direction of the robot we need to move forward or turn.
 			if(direction == "S"): 
-				PosR = nextCell[0]
-				return (self.headingToRotation("forward") ,1)
+				if(PosR -1 == nextCell[1]):
+					PosR = nextCell[1]
+					return (self.headingToRotation("forward") ,1)
+				elif(PosR -2 == nextCell[1]):
+					PosR = nextCell[1]
+					return (self.headingToRotation("forward") ,2)
+				elif(PosR -3 == nextCell[1]):
+					PosR = nextCell[1]
+					return (self.headingToRotation("forward") ,3)
+				else:
+					return (self.headingToRotation("forward") ,1)
 			if(direction == "E"): 
 				direction = "S"
 				return (self.headingToRotation("right") ,1)
@@ -303,8 +328,18 @@ class bfs(object):
 				direction = "E"
 				return (self.headingToRotation("right") ,1)
 			if(direction == "E"): 
-				PosC = nextCell[1]
-				return (self.headingToRotation("forward") ,1)
+				if(PosC +1 == nextCell[0]):
+					PosC = nextCell[0]
+					return (self.headingToRotation("forward") ,1)
+				elif(PosC +2 == nextCell[0]):
+					PosC = nextCell[0]
+					return (self.headingToRotation("forward") ,2)
+				elif(PosC +3 == nextCell[0]):
+					PosC = nextCell[0]
+					return (self.headingToRotation("forward") ,3)
+				else:
+					return (self.headingToRotation("forward") ,1)
+				
 			if(direction == "S"): 
 				direction = "E"
 				return (self.headingToRotation("left") ,1)
@@ -315,8 +350,17 @@ class bfs(object):
 			#based on the direction of the robot we need to move forward or turn.
 			if(direction == "N"): 
 				direction = "N"
-				PosR = nextCell[0]
-				return (self.headingToRotation("forward") ,1)
+				if(PosR +1 == nextCell[1]):
+					PosR = nextCell[1]
+					return (self.headingToRotation("forward") ,1)
+				elif(PosR +2 == nextCell[1]):
+					PosR = nextCell[1]
+					return (self.headingToRotation("forward") ,2)
+				elif(PosR +3 == nextCell[1]):
+					PosR = nextCell[1]
+					return (self.headingToRotation("forward") ,3)
+				else:
+					return (self.headingToRotation("forward") ,1)
 			if(direction == "E"): 
 				direction = "N"
 				return (self.headingToRotation("left") ,1)
@@ -338,11 +382,23 @@ class bfs(object):
 				direction = "W"
 				return (self.headingToRotation("right") ,1)
 			if(direction == "W"):
-				PosC = nextCell[1]
-				return (self.headingToRotation("forward") ,1)
+				if(PosC -1 == nextCell[0]):
+					PosC = nextCell[0]
+					#pdb.set_trace()
+					return (self.headingToRotation("forward") ,1)
+				elif(PosC -2 == nextCell[0]):
+					PosC = nextCell[0]
+					return (self.headingToRotation("forward") ,2)
+				elif(PosC -3 == nextCell[0]):
+					PosC = nextCell[0]
+					return (self.headingToRotation("forward") ,3)
+				else:
+					return (self.headingToRotation("forward") ,1)
+
 		else:
 			print("same location.")
 			return (self.headingToRotation("forward") ,0)
+	 
 	 
 		 
 	def modFloodfill(self):
@@ -620,6 +676,7 @@ class bfs(object):
 
 					qResult.put([0,0])
 					#pdb.set_trace() 
+					qResult.queue=pathOptimizerObj.process(qResult.queue) 
 					return qResult
 				else:
 					#add to queue to serch using breadfirst serach

@@ -244,22 +244,22 @@ class floodFill(object):
 				
 				#return  self.takeAction(nextCell, direction)
 		elif(self.isGoalReached==True and  (location[0] == int(self.oldLocation[0]) )and (location[1] == int(self.oldLocation[1]))):
-				if exploreAfterGoalReached and not q.empty():
-					nextCell =self.modFloodfill()
-					self.previousTrip=False
-					if nextCell == []:
-						self.reset()
-						return  ('Reset', 'Reset')
-				else:
-					nextCell = []
-					#empty queue to complete calculations
-					while(not q.empty()):
-						self.modFloodfill()
-					
-					self.previousTrip=False
+			if exploreAfterGoalReached and not q.empty():
+				nextCell =self.modFloodfill()
+				self.previousTrip=False
+				if nextCell == []:
 					self.reset()
-					#pdb.set_trace()
 					return  ('Reset', 'Reset')
+			else:
+				nextCell = []
+				#empty queue to complete calculations
+				while(not q.empty()):
+					self.modFloodfill()
+				
+				self.previousTrip=False
+				self.reset()
+				#pdb.set_trace()
+				return  ('Reset', 'Reset')
 		else:
 			self.previousTrip=True
 			# robot was not able to reach previous goal

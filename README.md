@@ -1,8 +1,24 @@
 # MicroMouseAi
 
-to change algorithm change do changes in robot.py
+To run program:-
+python3 tester.py test_maze_01.txt 
+python3 tester.py test_maze_02.txt 
+python3 tester.py test_maze_03.txt 
 
-#self.algoObj=  AlgoPackage('random' ,self.location, self.heading,self.goal_bounds, self.maze_dim )
-self.algoObj=  AlgoPackage('floodfill' ,self.location, self.heading,self.goal_bounds, self.maze_dim )
-#self.algoObj=  AlgoPackage('dfs' ,self.location, self.heading,self.goal_bounds, self.maze_dim )
-#self.algoObj=  AlgoPackage('bfs' ,self.location, self.heading,self.goal_bounds, self.maze_dim )
+
+
+To change code to still explore unexplored neighbourd after robot reached goal in trail mode
+robot.py:-
+self.exploreAfterGoalReached= False // change it to True
+
+
+
+to change algorithm change do changes in 
+robot.py:-
+ #self.algoObj=  AlgoPackage('floodfill' ,self.location, self.heading,self.goal_bounds, self.maze_dim ,self.exploreAfterGoalReached)
+ #self.algoObj=  AlgoPackage('dfs' ,self.location, self.heading,self.goal_bounds, self.maze_dim ,self.exploreAfterGoalReached )
+ #self.algoObj=  AlgoPackage('bfs' ,self.location, self.heading,self.goal_bounds, self.maze_dim ,self.exploreAfterGoalReached)
+
+
+After code ends check:-
+test score, train score and total score
